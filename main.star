@@ -68,12 +68,12 @@ def run(plan, args):
 
     l2_config = arbitrum_args_with_right_defaults.network_params
 
-    sequencer_launcher.start_service(plan, "sequencer", "offchainlabs/nitro-node:v3.0.1-cf4b74e-dev", all_l1_participants[0].el_context.rpc_http_url)
+    sequencer_launcher.start_service(plan, "sequencer-batcher", "offchainlabs/nitro-node:v3.0.1-cf4b74e-dev", all_l1_participants[0].el_context.rpc_http_url, l1_priv_key, l1_address)
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
     deployed_chain_info = contract_deployer.deploy_factory_contract(
         plan, l1_priv_key, l1_address, l1_config_env_vars, l2_config, l2_contract_deployer_image
     )
-    sequencer_launcher.launch(plan, "sequencer", deployed_chain_info)
+    sequencer_launcher.launch(plan, "sequencer-batcher", deployed_chain_info, all_l1_participants[0].el_context.rpc_http_url, l1_priv_key)
 
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):

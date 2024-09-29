@@ -8,7 +8,7 @@ def deploy_factory_contract(
 ):
 
     wasm_root = plan.exec(
-        service_name="sequencer",
+        service_name="sequencer-batcher",
         recipe=ExecRecipe(
             command = ["/bin/sh", "-c", "cat /home/user/target/machines/latest/module-root.txt | tr -d '\n'"]
         ),
