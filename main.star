@@ -6,6 +6,7 @@ static_files = import_module(
 l2_launcher = import_module("./src/l2.star")
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 input_parser = import_module("./src/package_io/input_parser.star")
+sequencer_launcher = import_module("./src/sequencer/sequencer_launcher.star")
 
 
 def run(plan, args):
@@ -67,54 +68,12 @@ def run(plan, args):
 
     l2_config = arbitrum_args_with_right_defaults.network_params
 
+    sequencer_launcher.start_service(plan, "sequencer", "offchainlabs/nitro-node:v3.0.1-cf4b74e-dev", all_l1_participants[0].el_context.rpc_http_url)
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
-    contract_deployer.deploy_factory_contract(
+    deployed_chain_info = contract_deployer.deploy_factory_contract(
         plan, l1_priv_key, l1_address, l1_config_env_vars, l2_config, l2_contract_deployer_image
     )
-    # Deploy L2s
-    plan.print("Deploying a local L2")
-    if type(arbitrum_args) == "dict":
-        l2_services_suffix = ""  # no suffix if one l2
-        l2_launcher.launch_l2(
-            plan,
-            l2_services_suffix,
-            arbitrum_args,
-            l1_config_env_vars,
-            l1_priv_key,
-            all_l1_participants[0].el_context,
-        )
-    elif type(arbitrum_args) == "list":
-        seen_names = {}
-        seen_network_ids = {}
-        for l2_num, l2_args in enumerate(arbitrum_args):
-            name = l2_args["network_params"]["name"]
-            network_id = l2_args["network_params"]["network_id"]
-            if name in seen_names:
-                fail(
-                    "Duplicate name: {0} provided, make sure you use unique names.".format(
-                        name
-                    )
-                )
-            if network_id in seen_network_ids:
-                fail(
-                    "Duplicate network_id: {0} provided, make sure you use unique network_ids.".format(
-                        network_id
-                    )
-                )
-
-            seen_names[name] = True
-            seen_network_ids[network_id] = True
-            l2_services_suffix = "-{0}".format(name)
-            l2_launcher.launch_l2(
-                plan,
-                l2_services_suffix,
-                l2_args,
-                l1_config_env_vars,
-                l1_priv_key,
-                all_l1_participants[0].el_context,
-            )
-    else:
-        fail("invalid type provided for param: `arbitrum-package`")
+    sequencer_launcher.launch(plan, "sequencer", deployed_chain_info)
 
 
 def get_l1_config(all_l1_participants, l1_network_params, l1_network_id):

@@ -1,0 +1,63 @@
+{
+  "parent-chain": {
+    "connection": {
+      "url": "{{ .L1URL }}"
+    }
+  },
+  "chain": {
+    "id": 412346,
+    "info-files": ["/home/user/l2_chain_config.json"]
+  },
+  "node": {
+    "staker": {
+      "dangerous": {
+        "without-block-validator": false
+      },
+      "parent-chain-wallet": {
+        "account": "validator",
+        "password": "passphrase",
+        "pathname": "/home/user/l1keystore"
+      },
+      "disable-challenge": false,
+      "enable": false,
+      "staker-interval": "10s",
+      "make-assertion-interval": "10s",
+      "strategy": "MakeNodes"
+    },
+    "sequencer": true,
+    "dangerous": {
+      "no-sequencer-coordinator": true,
+      "disable-blob-reader": true
+    },
+    "delayed-sequencer": {
+      "enable": true
+    },
+    "seq-coordinator": {
+      "enable": false,
+      "redis-url": "",
+      "lockout-duration": "30s",
+      "lockout-spare": "1s",
+      "my-url": "",
+      "retry-interval": "0.5s",
+      "seq-num-duration": "24h0m0s",
+      "update-interval": "3s"
+    }
+  },
+  "execution": {
+    "sequencer": {
+      "enable": true
+    },
+    "forwarding-target": "null"
+  },
+  "persistent": {
+    "chain": "local"
+  },
+  "ws": {
+    "addr": "0.0.0.0"
+  },
+  "http": {
+    "addr": "0.0.0.0",
+    "vhosts": "*",
+    "corsdomain": "*"
+  }
+}

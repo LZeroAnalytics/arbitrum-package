@@ -7,12 +7,12 @@ def deploy_factory_contract(
         image,
 ):
 
-    wasm_root = plan.run_sh(
-        name="wasm-root-query",
-        description="Retrieving wasm room from the node",
-        image="offchainlabs/nitro-node:v3.1.2-309340a",
-        run="cat /home/user/target/machines/latest/module-root.txt | tr -d '\n'",
-        wait="300s",
+    wasm_root = plan.exec(
+        service_name="sequencer",
+        recipe=ExecRecipe(
+            command = ["/bin/sh", "-c", "cat /home/user/target/machines/latest/module-root.txt | tr -d '\n'"]
+        ),
+        description="Retrieving wasm root from sequencer"
     )
 
     l2_config = render_l2_config(plan, l2_config, owner_address)
@@ -27,7 +27,6 @@ def deploy_factory_contract(
         }
     )
 
-
     env_vars = {
         "PARENT_CHAIN_RPC": l1_config_env_vars["L1_RPC_URL"],
         "DEPLOYER_PRIVKEY": str(owner_priv_key),
@@ -36,26 +35,69 @@ def deploy_factory_contract(
         "MAX_DATA_SIZE": "117964",
         "OWNER_ADDRESS": owner_address,
         "SEQUENCER_ADDRESS": owner_address,
-        "WASM_MODULE_ROOT": wasm_root.output,
+        "WASM_MODULE_ROOT": wasm_root["output"],
         "AUTHORIZE_VALIDATORS": "10",
         "CHILD_CHAIN_CONFIG_PATH": "/config/l2_chain_config.json",
         "CHAIN_DEPLOYMENT_INFO": "/config/deployment.json",
         "CHILD_CHAIN_INFO": "/config/deployed_chain_info.json",
     }
 
-    plan.run_sh(
-        name="deploy-l2-chain",
-        description="Deploying the L2 chain using rollupcreator",
-        image=image,
-        env_vars=env_vars,
-        run="cd /workspace && yarn run create-rollup-testnode",
-        files={
-            "/config": l2_config
-        },
-        wait="300s",  # Wait for 5 minutes, as this may take some time
+    plan.add_service(
+        name="contract-deployer",
+        description="Deploying the L2 contracts using rollupcreator",
+        config = ServiceConfig(
+            image=image,
+            env_vars=env_vars,
+            entrypoint=[
+                "/bin/bash",
+                "-c",
+                "tail -f /dev/null"
+            ],
+            files = {
+                "/config": l2_config
+            }
+        )
+    )
+
+    plan.exec(
+        service_name="contract-deployer",
+        description="Deploying contracts",
+        recipe = ExecRecipe(
+            command=["/bin/bash", "-c", "cd /workspace && yarn run create-rollup-testnode"]
+        )
+    )
+
+    deployed_chain_info = plan.exec(
+        service_name="contract-deployer",
+        description="Retrieving deployed chain info",
+        recipe = ExecRecipe(
+            command= ["/bin/bash", "-c", "cat /config/deployed_chain_info.json"]
+        )
     )
 
     plan.print("Deployed contract with variables: {}".format(env_vars))
+
+    plan.remove_service(
+        name = "contract-deployer",
+        description = "Removing contract deployer"
+    )
+
+    return deployed_chain_info["output"]
+
+    # plan.run_sh(
+    #     name="deploy-l2-chain",
+    #     description="Deploying the L2 chain using rollupcreator",
+    #     image=image,
+    #     env_vars=env_vars,
+    #     run="cd /workspace && yarn run create-rollup-testnode",
+    #     files={
+    #         "/config": l2_config
+    #     },
+    #     store=[
+    #         StoreSpec(src = "/config/deployed_chain_info.json", name = "deployed_chain_info")
+    #     ],
+    #     wait="300s",  # Wait for 5 minutes, as this may take some time
+    # )
 
 
 def render_l2_config(plan, l2_config, owner_address):
