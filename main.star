@@ -19,7 +19,7 @@ def run(plan, args):
     # Deploy the L1
     plan.print("Deploying a local L1")
     l1 = ethereum_package.run(plan, ethereum_args)
-    plan.print(l1.network_params)
+    plan.print(l1)
     # Get L1 info
     all_l1_participants = l1.all_participants
     l1_network_params = l1.network_params
@@ -27,8 +27,35 @@ def run(plan, args):
     l1_priv_key = l1.pre_funded_accounts[
         12
     ].private_key  # reserved for L2 contract deployers
+    l1_address = l1.pre_funded_accounts[
+        12
+    ].address
     l1_config_env_vars = get_l1_config(
         all_l1_participants, l1_network_params, l1_network_id
+    )
+
+    plan.print(all_l1_participants)
+
+    # Wait for syncing to be done
+    plan.wait(
+        service_name = all_l1_participants[0].el_context.el_metrics_info[0]["name"],
+        recipe = PostHttpRequestRecipe(
+            port_id="rpc",
+            endpoint="",
+            body='{"jsonrpc": "2.0", "method": "eth_syncing", "params": [], "id": 1}',
+            headers={
+                "Content-Type": "application/json"
+            },
+            extract = {
+                "status": ".result"
+            }
+        ),
+        field = "extract.status",
+        assertion = "==",
+        target_value = False,
+        interval = "1s",
+        timeout = "5m",
+        description = "Waiting for node to sync"
     )
 
     if l1_network_params.network != "kurtosis":
@@ -38,9 +65,11 @@ def run(plan, args):
         arbitrum_args_with_right_defaults.contract_deployer_params.image
     )
 
+    l2_config = arbitrum_args_with_right_defaults.network_params
+
     # Deploy Create2 Factory contract (only need to do this once for multiple l2s)
     contract_deployer.deploy_factory_contract(
-        plan, l1_priv_key, l1_config_env_vars, l2_contract_deployer_image
+        plan, l1_priv_key, l1_address, l1_config_env_vars, l2_config, l2_contract_deployer_image
     )
     # Deploy L2s
     plan.print("Deploying a local L2")

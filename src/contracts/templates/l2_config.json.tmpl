@@ -1,0 +1,28 @@
+{
+  "chainId": {{ .chainId }},
+  "homesteadBlock": {{ .homesteadBlock }},
+  "daoForkSupport": {{ .daoForkSupport }},
+  "eip150Block": {{ .eip150Block }},
+  "eip150Hash": "{{ .eip150Hash }}",
+  "eip155Block": {{ .eip155Block }},
+  "eip158Block": {{ .eip158Block }},
+  "byzantiumBlock": {{ .byzantiumBlock }},
+  "constantinopleBlock": {{ .constantinopleBlock }},
+  "petersburgBlock": {{ .petersburgBlock }},
+  "istanbulBlock": {{ .istanbulBlock }},
+  "muirGlacierBlock": {{ .muirGlacierBlock }},
+  "berlinBlock": {{ .berlinBlock }},
+  "londonBlock": {{ .londonBlock }},
+  "clique": {
+    "period": {{ .cliquePeriod }},
+    "epoch": {{ .cliqueEpoch }}
+  },
+  "arbitrum": {
+    "EnableArbOS": {{ .EnableArbOS }},
+    "AllowDebugPrecompiles": {{ .AllowDebugPrecompiles }},
+    "DataAvailabilityCommittee": {{ .DataAvailabilityCommittee }},
+    "InitialArbOSVersion": {{ .InitialArbOSVersion }},
+    "InitialChainOwner": "{{ .InitialChainOwner }}",
+    "GenesisBlockNum": {{ .GenesisBlockNum }}
+  }
+}

@@ -8,4 +8,4 @@ arbitrum_package:
   additional_services:
     - blockscout
   contract_deployer_params:
-    image: ethpandaops/optimism-contract-deployer:develop
+    image: tiljordan/arbitrum-contract-deployer:1.0.0

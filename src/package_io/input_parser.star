@@ -30,7 +30,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "participants",
 )
 
-
 DEFAULT_ADDITIONAL_SERVICES = []
 
 
@@ -50,14 +49,35 @@ def input_parser(plan, input_args):
             for participant in result["participants"]
         ],
         network_params=struct(
-            network=result["network_params"]["network"],
-            network_id=result["network_params"]["network_id"],
-            seconds_per_slot=result["network_params"]["seconds_per_slot"],
-            name=result["network_params"]["name"],
-            fjord_time_offset=result["network_params"]["fjord_time_offset"],
-            granite_time_offset=result["network_params"]["granite_time_offset"],
-            holocene_time_offset=result["network_params"]["holocene_time_offset"],
-            interop_time_offset=result["network_params"]["interop_time_offset"],
+            network=result["network_params"].get("network", "kurtosis"),
+            network_id=result["network_params"].get("network_id", "2151908"),
+            seconds_per_slot=result["network_params"].get("seconds_per_slot", 2),
+            name=result["network_params"].get("name", "op-kurtosis"),
+            fjord_time_offset=result["network_params"].get("fjord_time_offset", 0),
+            granite_time_offset=result["network_params"].get("granite_time_offset", None),
+            holocene_time_offset=result["network_params"].get("holocene_time_offset", None),
+            interop_time_offset=result["network_params"].get("interop_time_offset", None),
+            chainId=result["network_params"].get("chainId", 412346),
+            homesteadBlock=result["network_params"].get("homesteadBlock", 0),
+            daoForkSupport=result["network_params"].get("daoForkSupport", True),
+            eip150Block=result["network_params"].get("eip150Block", 0),
+            eip150Hash=result["network_params"].get("eip150Hash", "0x0000000000000000000000000000000000000000000000000000000000000000"),
+            eip155Block=result["network_params"].get("eip155Block", 0),
+            eip158Block=result["network_params"].get("eip158Block", 0),
+            byzantiumBlock=result["network_params"].get("byzantiumBlock", 0),
+            constantinopleBlock=result["network_params"].get("constantinopleBlock", 0),
+            petersburgBlock=result["network_params"].get("petersburgBlock", 0),
+            istanbulBlock=result["network_params"].get("istanbulBlock", 0),
+            muirGlacierBlock=result["network_params"].get("muirGlacierBlock", 0),
+            berlinBlock=result["network_params"].get("berlinBlock", 0),
+            londonBlock=result["network_params"].get("londonBlock", 0),
+            cliquePeriod=result["network_params"].get("cliquePeriod", 0),
+            cliqueEpoch=result["network_params"].get("cliqueEpoch", 0),
+            EnableArbOS=result["network_params"].get("EnableArbOS", True),
+            AllowDebugPrecompiles=result["network_params"].get("AllowDebugPrecompiles", True),
+            DataAvailabilityCommittee=result["network_params"].get("DataAvailabilityCommittee", False),
+            InitialArbOSVersion=result["network_params"].get("InitialArbOSVersion", 30),
+            GenesisBlockNum=result["network_params"].get("GenesisBlockNum", 0)
         ),
         additional_services=result.get(
             "additional_services", DEFAULT_ADDITIONAL_SERVICES
@@ -65,6 +85,7 @@ def input_parser(plan, input_args):
         contract_deployer_params=struct(
             image=result["contract_deployer_params"]["image"],
         ),
+
     )
 
 
@@ -146,6 +167,27 @@ def default_network_params():
         "granite_time_offset": None,
         "holocene_time_offset": None,
         "interop_time_offset": None,
+        "chainId": 412346,
+        "homesteadBlock": 0,
+        "daoForkSupport": True,
+        "eip150Block": 0,
+        "eip150Hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "eip155Block": 0,
+        "eip158Block": 0,
+        "byzantiumBlock": 0,
+        "constantinopleBlock": 0,
+        "petersburgBlock": 0,
+        "istanbulBlock": 0,
+        "muirGlacierBlock": 0,
+        "berlinBlock": 0,
+        "londonBlock": 0,
+        "cliquePeriod": 0,
+        "cliqueEpoch": 0,
+        "EnableArbOS": True,
+        "AllowDebugPrecompiles": True,
+        "DataAvailabilityCommittee": False,
+        "InitialArbOSVersion": 30,
+        "GenesisBlockNum": 0
     }
 
 
@@ -161,5 +203,5 @@ def default_participant():
 
 def default_contract_deployer_params():
     return {
-        "image": "ethpandaops/optimism-contract-deployer:develop",
+        "image": "tiljordan/arbitrum-contract-deployer:1.0.0",
     }
